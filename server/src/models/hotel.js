@@ -1,35 +1,19 @@
 import mongoose from 'mongoose'
 
 const hotelSchema = new mongoose.Schema({
-    name: {
+    hotelName: {
         type: String,
         required: true,
         trim: true
     },
-    address: {
+    hotelAddress: {
         type: String,
         required: true,
         trim: true
     },
-    contactNumber: {
+    hotelContactNumber: {
         type: String,
         required: true,
-        trim: true
-    },
-    ownerContactNumber: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    email: {
-        type: String,
-        required: true,
-        trim: true,
-        unique: true
-    },
-    isEmailVerified: {
-        type: Boolean,
-        default: false
     },
     hotelType: {
         type: String,
@@ -42,12 +26,25 @@ const hotelSchema = new mongoose.Schema({
     }],
     operationalHours: {
         type: Map,
-        of: String,
+        of: {
+            type: String,
+            default: 'Closed'
+        },
         required: true,
+        validate: {
+            validator: function (v) {
+                const validDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                const isValidDay = Object.keys(v).every(day => validDays.includes(day));
+                if (!isValidDay) return false;
+                ///^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/   this is 24hr format regExp
+                return Object.values(v).every(time => time === 'Closed' || /^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/.test(time));
+            },
+            message: props => `Operational hours must include valid days of the week`
+        },
     },
-    workingDays: {
-        type: [String],
-        enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Owner',
         required: true
     }
 });

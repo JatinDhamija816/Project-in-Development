@@ -79,3 +79,21 @@ export const addCuisine = async (req, res) => {
         });
     }
 };
+
+export const getCuisine = async (req, res) => {
+    try {
+        const cuisine = await Cuisine.find()
+        return res.status(200).json({
+            success: true,
+            message: 'All Cuisine',
+            cuisine
+        });
+    } catch (error) {
+        console.error('Error in getCuisine Controller:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message
+        });
+    }
+};
