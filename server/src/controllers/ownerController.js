@@ -15,7 +15,7 @@ export const register = async (req, res) => {
                 success: false,
                 message: 'Invalid input',
                 errors: errors.array()
-            });
+            })
         }
 
         const { name, email, contactNumber, password } = req.body
@@ -80,19 +80,19 @@ export const verifyEmail = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: 'Token has expired. Please request a new verification email.'
-            });
+            })
         }
         if (error.name === 'JsonWebTokenError') {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid token.'
-            });
+            })
         }
         return res.status(500).json({
             success: false,
             message: 'An error occurred during verification. Please try again later.',
             error: error
-        });
+        })
     }
 }
 
@@ -129,7 +129,7 @@ export const login = async (req, res) => {
             token
         })
     } catch (error) {
-        console.error('Error in login module:', error);
+        console.error('Error in login module:', error)
         return res.status(500).json({
             success: false,
             message: 'Internal server error.',
@@ -143,12 +143,12 @@ export const logout = async (req, res) => {
         res.cookie('token', '', {
             expires: new Date(0),
             httpOnly: true
-        });
+        })
 
         return res.status(200).json({
             success: true,
             message: 'Logout successful'
-        });
+        })
     } catch (error) {
         console.error('Error in Logout module', error)
         return res.status(500).json({
@@ -218,19 +218,19 @@ export const verifyPasswordToken = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: 'Token has expired. Please request a new verification email.'
-            });
+            })
         }
         if (error.name === 'JsonWebTokenError') {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid token.'
-            });
+            })
         }
         return res.status(500).json({
             success: false,
             message: 'An error occurred during verification of Password Token. Please try again later.',
             error
-        });
+        })
     }
 }
 
@@ -242,7 +242,7 @@ export const changePassword = async (req, res) => {
                 success: false,
                 message: 'Invalid input',
                 errors: errors.array()
-            });
+            })
         }
 
         const { token } = req.params
@@ -253,7 +253,7 @@ export const changePassword = async (req, res) => {
                 success: false, message: 'New Password and Confirm Password are not match'
             })
         }
-        const { id } = jwt.verify(token, process.env.JWT_SECRET);
+        const { id } = jwt.verify(token, process.env.JWT_SECRET)
         const owner = await Owner.findById(id)
 
         const hashedPassword = await hashPassword(newPassword)
@@ -264,12 +264,12 @@ export const changePassword = async (req, res) => {
         res.cookie('verifyPassword', '', {
             expires: new Date(0),
             httpOnly: true
-        });
+        })
 
         return res.status(200).json({
             success: true,
             message: 'Password updated successfully',
-        });
+        })
 
     } catch (error) {
         console.error('Error in Reset Password Module', error)

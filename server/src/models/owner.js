@@ -21,7 +21,7 @@ const ownerSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    hotel: [{
+    hotels: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Hotel'
     }],
@@ -35,6 +35,6 @@ const ownerSchema = new mongoose.Schema({
     resetPasswordExpires: Date,
 }, { timestamps: true })
 
-const Owner = mongoose.model('owner', ownerSchema);
+const Owner = mongoose.model('owner', ownerSchema)
 
-export default Owner;
+export default Owner 

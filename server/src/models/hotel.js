@@ -1,5 +1,78 @@
 import mongoose from 'mongoose'
 
+const operationalHoursSchema = new mongoose.Schema({
+    monday: {
+        type: String,
+        default: 'closed',
+        validate: {
+            validator: function (v) {
+                return /^(0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m$/.test(v)
+            },
+            message: props => `${props.value} is not a valid time format!`
+        }
+    },
+    tuesday: {
+        type: String,
+        default: 'closed',
+        validate: {
+            validator: function (v) {
+                return /^(0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m$/.test(v)
+            },
+            message: props => `${props.value} is not a valid time format!`
+        }
+    },
+    wednesday: {
+        type: String,
+        default: 'closed',
+        validate: {
+            validator: function (v) {
+                return /^(0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m$/.test(v)
+            },
+            message: props => `${props.value} is not a valid time format!`
+        }
+    },
+    thursday: {
+        type: String,
+        default: 'closed',
+        validate: {
+            validator: function (v) {
+                return /^(0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m$/.test(v)
+            },
+            message: props => `${props.value} is not a valid time format!`
+        }
+    },
+    friday: {
+        type: String,
+        default: 'closed',
+        validate: {
+            validator: function (v) {
+                return /^(0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m$/.test(v)
+            },
+            message: props => `${props.value} is not a valid time format!`
+        }
+    },
+    saturday: {
+        type: String,
+        default: 'closed',
+        validate: {
+            validator: function (v) {
+                return /^(0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m$/.test(v)
+            },
+            message: props => `${props.value} is not a valid time format!`
+        }
+    },
+    sunday: {
+        type: String,
+        default: 'closed',
+        validate: {
+            validator: function (v) {
+                return /^(0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m$/.test(v)
+            },
+            message: props => `${props.value} is not a valid time format!`
+        }
+    }
+}, { _id: false })
+
 const hotelSchema = new mongoose.Schema({
     hotelName: {
         type: String,
@@ -11,17 +84,17 @@ const hotelSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    city:{
+    city: {
         type: String,
         required: true,
         trim: true
     },
-    state:{
+    state: {
         type: String,
         required: true,
         trim: true
     },
-    hotelContactNumber: {
+    contactNumber: {
         type: String,
         required: true,
     },
@@ -30,35 +103,25 @@ const hotelSchema = new mongoose.Schema({
         enum: ['delivery', 'dine-in', 'both'],
         required: true
     },
-    cuisines: [{
+    dishes: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Cuisine'
+        ref: 'Food'
     }],
     operationalHours: {
-        type: Map,
-        of: {
-            type: String,
-            default: 'Closed'
-        },
-        required: true,
-        validate: {
-            validator: function (v) {
-                const validDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-                const isValidDay = Object.keys(v).every(day => validDays.includes(day));
-                if (!isValidDay) return false;
-                ///^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/   this is 24hr format regExp
-                return Object.values(v).every(time => time === 'Closed' || /^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/.test(time));
-            },
-            message: props => `Operational hours must include valid days of the week`
-        },
+        type: operationalHoursSchema,
+        default: () => ({})
+    },
+    image: {
+        type: String,
+        default: 'https://blog.ipleaders.in/wp-content/uploads/2019/11/foodmitho.jpg'
     },
     owner: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Owner',
         required: true
     }
-});
+}, { timestamps: true })
 
-const Hotel = mongoose.model('Hotel', hotelSchema);
+const Hotel = mongoose.model('Hotel', hotelSchema)
 
-export default Hotel;
+export default Hotel 

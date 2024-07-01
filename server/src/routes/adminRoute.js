@@ -1,11 +1,9 @@
 import express from 'express'
-import { login, addCuisine, getCuisine } from '../controllers/adminController.js'
-import { validateCuisine } from '../middleware/validateCuisine.js'
+import { login, logout } from '../controllers/adminController.js'
 
 const router = express.Router()
 
 router.post('/login', login)
-router.post('/addCuisine', validateCuisine, addCuisine)
-router.get('/getCuisine', getCuisine)
+router.post('/logout', logout)
 
 export default router
