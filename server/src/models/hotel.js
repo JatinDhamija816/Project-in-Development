@@ -1,12 +1,15 @@
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
+
+const defaultToClosed = (val) => val === "" ? "closed" : val || "closed";
 
 const operationalHoursSchema = new mongoose.Schema({
     monday: {
         type: String,
         default: 'closed',
+        set: defaultToClosed,
         validate: {
             validator: function (v) {
-                return /^(0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m$/.test(v)
+                return /^(closed|((0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m))$/.test(v);
             },
             message: props => `${props.value} is not a valid time format!`
         }
@@ -14,9 +17,10 @@ const operationalHoursSchema = new mongoose.Schema({
     tuesday: {
         type: String,
         default: 'closed',
+        set: defaultToClosed,
         validate: {
             validator: function (v) {
-                return /^(0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m$/.test(v)
+                return /^(closed|((0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m))$/.test(v);
             },
             message: props => `${props.value} is not a valid time format!`
         }
@@ -24,9 +28,10 @@ const operationalHoursSchema = new mongoose.Schema({
     wednesday: {
         type: String,
         default: 'closed',
+        set: defaultToClosed,
         validate: {
             validator: function (v) {
-                return /^(0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m$/.test(v)
+                return /^(closed|((0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m))$/.test(v);
             },
             message: props => `${props.value} is not a valid time format!`
         }
@@ -34,9 +39,10 @@ const operationalHoursSchema = new mongoose.Schema({
     thursday: {
         type: String,
         default: 'closed',
+        set: defaultToClosed,
         validate: {
             validator: function (v) {
-                return /^(0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m$/.test(v)
+                return /^(closed|((0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m))$/.test(v);
             },
             message: props => `${props.value} is not a valid time format!`
         }
@@ -44,9 +50,10 @@ const operationalHoursSchema = new mongoose.Schema({
     friday: {
         type: String,
         default: 'closed',
+        set: defaultToClosed,
         validate: {
             validator: function (v) {
-                return /^(0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m$/.test(v)
+                return /^(closed|((0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m))$/.test(v);
             },
             message: props => `${props.value} is not a valid time format!`
         }
@@ -54,9 +61,10 @@ const operationalHoursSchema = new mongoose.Schema({
     saturday: {
         type: String,
         default: 'closed',
+        set: defaultToClosed,
         validate: {
             validator: function (v) {
-                return /^(0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m$/.test(v)
+                return /^(closed|((0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m))$/.test(v);
             },
             message: props => `${props.value} is not a valid time format!`
         }
@@ -64,15 +72,17 @@ const operationalHoursSchema = new mongoose.Schema({
     sunday: {
         type: String,
         default: 'closed',
+        set: defaultToClosed,
         validate: {
             validator: function (v) {
-                return /^(0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m$/.test(v)
+                return /^(closed|((0[1-9]|1[0-2]):([0-5][0-9])[ap]m : (0[1-9]|1[0-2]):([0-5][0-9])[ap]m))$/.test(v);
             },
             message: props => `${props.value} is not a valid time format!`
         }
     }
-}, { _id: false })
+}, { _id: false });
 
+// Schema for hotel
 const hotelSchema = new mongoose.Schema({
     hotelName: {
         type: String,
@@ -109,7 +119,15 @@ const hotelSchema = new mongoose.Schema({
     }],
     operationalHours: {
         type: operationalHoursSchema,
-        default: () => ({})
+        default: () => ({
+            monday: 'closed',
+            tuesday: 'closed',
+            wednesday: 'closed',
+            thursday: 'closed',
+            friday: 'closed',
+            saturday: 'closed',
+            sunday: 'closed'
+        })
     },
     image: {
         type: String,
@@ -120,8 +138,8 @@ const hotelSchema = new mongoose.Schema({
         ref: 'Owner',
         required: true
     }
-}, { timestamps: true })
+}, { timestamps: true });
 
-const Hotel = mongoose.model('Hotel', hotelSchema)
+const Hotel = mongoose.model('Hotel', hotelSchema);
 
-export default Hotel 
+export default Hotel;

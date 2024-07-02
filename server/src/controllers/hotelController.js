@@ -5,16 +5,33 @@ import Hotel from '../models/hotel.js'
 export const addHotel = async (req, res) => {
     try {
         const { token } = req.params
-        const { id } = jwt.verify(token, process.env.JWT_SECRET)
-        const owner = await Owner.findById(id)
+
+        let ownerId;
+        try {
+            const { id } = jwt.verify(token, process.env.JWT_SECRET);
+            ownerId = id;
+        } catch (error) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid token'
+            });
+        }
+
+        const owner = await Owner.findById(ownerId);
+        if (!owner) {
+            return res.status(404).json({
+                success: false,
+                message: 'Owner not found'
+            });
+        }
 
         const { hotelName, address, city, state, contactNumber, hotelType, operationalHours } = req.body
 
         if (!hotelName || !address || !city || !state || !contactNumber || !hotelType || !operationalHours) {
             return res.status(400).json({
                 success: false,
-                message: "Please Provide all details"
-            })
+                message: "Please provide all details"
+            });
         }
 
         const newHotel = new Hotel({
@@ -26,11 +43,11 @@ export const addHotel = async (req, res) => {
         owner.hotels.push(newHotel)
         await owner.save()
 
-        return res.status(200).json({
+        return res.status(201).json({
             success: true,
             message: 'New Hotel Created',
             newHotel,
-        })
+        });
     } catch (error) {
         console.error('Error in addHotel Controller', error)
         return res.status(500).json({
@@ -45,17 +62,27 @@ export const getHotel = async (req, res) => {
     try {
         const { hotelId, token } = req.params
 
-        const { id } = jwt.verify(token, process.env.JWT_SECRET)
-        const owner = await Owner.findById(id)
+        let ownerId;
+        try {
+            const { id } = jwt.verify(token, process.env.JWT_SECRET);
+            ownerId = id;
+        } catch (error) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid token'
+            });
+        }
+
+        const owner = await Owner.findById(ownerId);
         if (!owner) {
             return res.status(404).json({
                 success: false,
-                message: 'Owner not found or invalid token',
-            })
+                message: 'Owner not found'
+            });
         }
 
-        const findHotel = await Hotel.findById(hotelId)
-        if (!findHotel) {
+        const hotel = await Hotel.findById(hotelId)
+        if (!hotel) {
             return res.status(404).json({
                 success: false,
                 message: 'Hotel not found',
@@ -63,16 +90,16 @@ export const getHotel = async (req, res) => {
         }
 
         if (!owner.hotels.includes(hotelId)) {
-            return res.status(404).json({
+            return res.status(403).json({
                 success: false,
-                message: 'Hotel not found in owner\'s list',
-            })
+                message: 'You do not have permission to access this hotel',
+            });
         }
 
         return res.status(200).json({
             success: true,
-            message: 'Hotel ',
-            findHotel
+            message: 'Hotel retrieved successfully',
+            hotel
         })
 
     } catch (error) {
@@ -89,24 +116,41 @@ export const updateHotel = async (req, res) => {
     try {
         const { hotelId, token } = req.params
 
-        const { id } = jwt.verify(token, process.env.JWT_SECRET)
-        const owner = await Owner.findById(id)
+        let ownerId;
+        try {
+            const { id } = jwt.verify(token, process.env.JWT_SECRET);
+            ownerId = id;
+        } catch (error) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid token'
+            });
+        }
+
+        const owner = await Owner.findById(ownerId);
         if (!owner) {
             return res.status(404).json({
                 success: false,
-                message: 'Owner not found or invalid token',
+                message: 'Owner not found'
+            });
+        }
+
+        const hotel = await Hotel.findById(hotelId)
+        if (!hotel) {
+            return res.status(404).json({
+                success: false,
+                message: 'Hotel not found',
             })
         }
 
+        if (!owner.hotels.includes(hotelId)) {
+            return res.status(403).json({
+                success: false,
+                message: 'Unauthorized access to hotel'
+            })
+        }
         const { hotelName, address, city, state, contactNumber, hotelType, operationalHours } = req.body
 
-        const findHotel = await Hotel.findById(hotelId)
-        if (!findHotel) {
-            return res.status(400).json({
-                success: true,
-                message: 'Hotel not Found',
-            })
-        }
         const updateFields = {}
 
         if (hotelName) updateFields.hotelName = hotelName
@@ -121,20 +165,21 @@ export const updateHotel = async (req, res) => {
         if (!updateHotel) {
             return res.status(400).json({
                 success: true,
-                message: 'Hotel not Updated something went wrong',
+                message: 'Hotel not updated, something went wrong'
             })
         }
 
         return res.status(200).json({
             success: true,
-            message: 'Hotel Updated',
+            message: 'Hotel updated successfully',
+            updateHotel
         })
 
     } catch (error) {
-        console.error('Error in update Hotel Controller', error)
+        console.error('Error in updateHotel controller', error);
         return res.status(500).json({
             success: false,
-            message: 'Error in update Hotel Controller',
+            message: 'Server error in updateHotel controller',
             error: error.message
         })
     }
@@ -144,17 +189,41 @@ export const deleteHotel = async (req, res) => {
     try {
         const { hotelId, token } = req.params
 
-        const { id } = jwt.verify(token, process.env.JWT_SECRET)
-        const owner = await Owner.findById(id)
+        if (!hotelId || !token) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields: hotelId and token',
+            });
+        }
+
+        let ownerId;
+        try {
+            const { id } = jwt.verify(token, process.env.JWT_SECRET);
+            ownerId = id;
+        } catch (error) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid token'
+            });
+        }
+
+        const owner = await Owner.findById(ownerId);
         if (!owner) {
             return res.status(404).json({
                 success: false,
-                message: 'Owner not found or invalid token',
-            })
+                message: 'Owner not found'
+            });
         }
 
-        if (!owner.hotels.includes(hotelId)) {
+        const hotel = await Hotel.findById(hotelId)
+        if (!hotel) {
             return res.status(404).json({
+                success: false,
+                message: 'Hotel not found',
+            })
+        }
+        if (!owner.hotels.includes(hotelId)) {
+            return res.status(403).json({
                 success: false,
                 message: 'Hotel not found in owner\'s list',
             })
@@ -167,7 +236,7 @@ export const deleteHotel = async (req, res) => {
         if (!deletedHotel) {
             return res.status(404).json({
                 success: false,
-                message: 'Hotel not found',
+                message: 'Hotel could not be deleted',
             })
         }
 
@@ -186,11 +255,12 @@ export const deleteHotel = async (req, res) => {
     }
 }
 
-export const getAllHotel = async (req, res) => {
+export const getAllHotelOfOwner = async (req, res) => {
     try {
         const { token } = req.params
 
         const { id } = jwt.verify(token, process.env.JWT_SECRET)
+
         const owner = await Owner.findById(id)
         if (!owner) {
             return res.status(404).json({
@@ -199,17 +269,35 @@ export const getAllHotel = async (req, res) => {
             })
         }
 
-        if (owner.hotels.length < 1 || owner.hotels.length === 0) {
+        if (!owner.hotels || owner.hotels.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: 'no hotel found',
-            })
+                message: 'No hotels found for this owner',
+            });
         }
-        const TotalHotel = []
-        for (let i = 0; i < owner.hotels.length; i++) {
-            const temp = await Hotel.findById(owner.hotels[i])
-            TotalHotel.push(temp)
-        }
+
+        const hotels = await Promise.all(
+            owner.hotels.map(hotelId => Hotel.findById(hotelId))
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: 'Hotels retrieved successfully',
+            hotels
+        });
+    } catch (error) {
+        console.error('Error in getHotel Controller', error)
+        return res.status(500).json({
+            success: false,
+            message: 'Error in getHotel Controller',
+            error: error.message
+        })
+    }
+}
+
+export const getAllHotel = async (req, res) => {
+    try {
+        const TotalHotel = await Hotel.find()
 
         return res.status(200).json({
             success: true,
